@@ -3,7 +3,7 @@ import { Howl, Howler } from 'howler';
 let bgVolume = 1;
 let sfxVolume = 1;
 let isMuted = false;
-const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-mineSweeper/';
+const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/';
 // const ASSET_BASE = '';
 // Store sound instances
 const sounds: Record<string, Howl> = {};

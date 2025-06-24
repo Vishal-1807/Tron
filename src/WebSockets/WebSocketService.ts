@@ -13,8 +13,8 @@ export class WebSocketService {
 
   // Get the URL with the current token from GlobalState
   private getWebSocketUrl(): string {
-    // const token = GlobalState.getToken();
-    const token = gametoken;
+    const token = GlobalState.getToken();
+    // const token = gametoken;
     return `wss://backend.inferixai.link/user/auth?authorization=Bearer ${token}`;
   }
 
