@@ -14,8 +14,8 @@ export const loadHistoryPage = async (page: number = 1, pageSize: number = 10) =
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'authorization': `Bearer ${gametoken}`,
-        // 'authorization': `Bearer ${GlobalState.getToken()}`
+        // 'authorization': `Bearer ${gametoken}`,
+        'authorization': `Bearer ${GlobalState.getToken()}`
       },
       body: JSON.stringify({
         page: page,

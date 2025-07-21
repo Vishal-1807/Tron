@@ -13,6 +13,7 @@ const createStartButton = (appWidth: number, appHeight: number, minesContainer?:
     const BUTTON_Y_RATIO = 0.50;  // Vertically centered
 
     const CLICK_DEBOUNCE_MS = 1000;
+    const MOBILE_RAPID_CLICK_THRESHOLD_MS = 300; // More aggressive for mobile
 
     const mainContainer = new Container();
     const startContainer = new Container();
@@ -47,6 +48,21 @@ const createStartButton = (appWidth: number, appHeight: number, minesContainer?:
 
     // Click debouncing
     let lastClickTime = 0;
+
+    // Enhanced state tracking for preventing multiple operations
+    let isStartOperationInProgress = false;
+    let isCollectOperationInProgress = false;
+
+    // Mobile-specific protection
+    const isMobileDevice = () => {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               ('ontouchstart' in window) ||
+               (navigator.maxTouchPoints > 0);
+    };
+
+    // Track rapid clicks for mobile protection
+    let clickCount = 0;
+    let clickCountResetTimeout: number | null = null;
 
     // Functions to disable/enable UI components immediately
     const disableUIComponents = () => {
@@ -206,41 +222,153 @@ const createStartButton = (appWidth: number, appHeight: number, minesContainer?:
         }
     };
 
-    // Internal click handlers with debouncing
+    // Internal click handlers with enhanced protection against multiple clicks
     const handleStartClick = async () => {
-        text.showClickGreenCell();
-        recordUserActivity(ActivityTypes.GAME_START);
-        const now = Date.now();
-        if (now - lastClickTime < CLICK_DEBOUNCE_MS) {
-            console.log('Click ignored - too rapid');
+        // IMMEDIATE PROTECTION: Check if operation is already in progress
+        if (isStartOperationInProgress) {
+            console.log('🚫 Start operation already in progress - ignoring click');
             return;
         }
+
+        const now = Date.now();
+        const isMobile = isMobileDevice();
+
+        // MOBILE-SPECIFIC PROTECTION: More aggressive protection for mobile devices
+        if (isMobile) {
+            clickCount++;
+
+            // Reset click count after a short period
+            if (clickCountResetTimeout) {
+                clearTimeout(clickCountResetTimeout);
+            }
+            clickCountResetTimeout = setTimeout(() => {
+                clickCount = 0;
+            }, MOBILE_RAPID_CLICK_THRESHOLD_MS);
+
+            // If more than 1 click in rapid succession on mobile, ignore
+            if (clickCount > 1) {
+                console.log(`🚫 Mobile rapid click protection - ignoring click ${clickCount}`);
+                return;
+            }
+
+            // More aggressive debouncing for mobile
+            if (now - lastClickTime < MOBILE_RAPID_CLICK_THRESHOLD_MS) {
+                console.log('🚫 Mobile click ignored - too rapid (mobile protection)');
+                return;
+            }
+        }
+
+        // STANDARD DEBOUNCE PROTECTION: Check time-based debouncing
+        if (now - lastClickTime < CLICK_DEBOUNCE_MS) {
+            console.log('🚫 Click ignored - too rapid (standard debounce protection)');
+            return;
+        }
+
+        // IMMEDIATELY mark operation as in progress and update last click time
+        isStartOperationInProgress = true;
         lastClickTime = now;
 
+        // Provide immediate visual feedback by disabling the button
+        if (startButtonSprite) {
+            startButtonSprite.alpha = 0.5;
+            startButtonSprite.eventMode = 'none';
+        }
+
+        console.log('🔒 Start operation initiated - button disabled');
+
         try {
+            text.showClickGreenCell();
+            recordUserActivity(ActivityTypes.GAME_START);
             console.log('=== START BUTTON CLICKED ===');
             await startClickHandler();
             SoundManager.playStartClick();
             console.log('=== START BUTTON HANDLER COMPLETED ===');
         } catch (error) {
             console.error('=== START BUTTON HANDLER FAILED ===', error);
+
+            // Re-enable button on error
+            if (startButtonSprite) {
+                startButtonSprite.alpha = 1.0;
+                startButtonSprite.eventMode = 'static';
+            }
+        } finally {
+            // Always reset the operation flag
+            isStartOperationInProgress = false;
+            console.log('🔓 Start operation completed - flag reset');
         }
     };
 
     const handleCollectClick = async () => {
-        recordUserActivity(ActivityTypes.COLLECT_CLICK);
-        // Same debounce logic as start button
+        // IMMEDIATE PROTECTION: Check if operation is already in progress
+        if (isCollectOperationInProgress) {
+            console.log('🚫 Collect operation already in progress - ignoring click');
+            return;
+        }
+
         const now = Date.now();
-        if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
+        const isMobile = isMobileDevice();
+
+        // MOBILE-SPECIFIC PROTECTION: More aggressive protection for mobile devices
+        if (isMobile) {
+            clickCount++;
+
+            // Reset click count after a short period
+            if (clickCountResetTimeout) {
+                clearTimeout(clickCountResetTimeout);
+            }
+            clickCountResetTimeout = setTimeout(() => {
+                clickCount = 0;
+            }, MOBILE_RAPID_CLICK_THRESHOLD_MS);
+
+            // If more than 1 click in rapid succession on mobile, ignore
+            if (clickCount > 1) {
+                console.log(`🚫 Mobile rapid collect click protection - ignoring click ${clickCount}`);
+                return;
+            }
+
+            // More aggressive debouncing for mobile
+            if (now - lastClickTime < MOBILE_RAPID_CLICK_THRESHOLD_MS) {
+                console.log('🚫 Mobile collect click ignored - too rapid (mobile protection)');
+                return;
+            }
+        }
+
+        // STANDARD DEBOUNCE PROTECTION: Check time-based debouncing
+        if (now - lastClickTime < CLICK_DEBOUNCE_MS) {
+            console.log('🚫 Collect click ignored - too rapid (standard debounce protection)');
+            return;
+        }
+
+        // IMMEDIATELY mark operation as in progress and update last click time
+        isCollectOperationInProgress = true;
         lastClickTime = now;
 
+        // Provide immediate visual feedback by disabling the button
+        if (collectButtonSprite) {
+            collectButtonSprite.alpha = 0.5;
+            collectButtonSprite.eventMode = 'none';
+        }
+
+        console.log('🔒 Collect operation initiated - button disabled');
+
         try {
+            recordUserActivity(ActivityTypes.COLLECT_CLICK);
             console.log('=== COLLECT BUTTON CLICKED ===');
             await collectClickHandler();
             SoundManager.playCollectClick();
             console.log('=== COLLECT BUTTON HANDLER COMPLETED ===');
         } catch (error) {
             console.error('=== COLLECT BUTTON HANDLER FAILED ===', error);
+
+            // Re-enable button on error
+            if (collectButtonSprite) {
+                collectButtonSprite.alpha = 1.0;
+                collectButtonSprite.eventMode = 'static';
+            }
+        } finally {
+            // Always reset the operation flag
+            isCollectOperationInProgress = false;
+            console.log('🔓 Collect operation completed - flag reset');
         }
     };
 
@@ -302,12 +430,21 @@ const createStartButton = (appWidth: number, appHeight: number, minesContainer?:
         const currentRow = GlobalState.getCurrentRow();
         const totalRows = GlobalState.total_rows;
 
+        // Store previous visibility states
+        const wasStartVisible = startContainer.visible;
+        const wasCollectVisible = collectContainer.visible;
+
         // Start button: show when game is not started and not temporarily hidden
         startContainer.visible = !gameStarted && !isButtonTemporarilyHidden;
 
         // Collect button: show when game is started AND not at initial row (totalRows - 1) AND animations are complete AND not temporarily hidden
         const isAtInitialRow = currentRow === totalRows - 1;
         collectContainer.visible = gameStarted && !isAtInitialRow && cellClickAnimationsComplete && !isButtonTemporarilyHidden;
+
+        // Restore button states if they became visible
+        if ((startContainer.visible && !wasStartVisible) || (collectContainer.visible && !wasCollectVisible)) {
+            restoreButtonStates();
+        }
 
         console.log(`Button visibility updated - Start: ${startContainer.visible}, Collect: ${collectContainer.visible} (gameStarted: ${gameStarted}, currentRow: ${currentRow}, totalRows: ${totalRows}, isAtInitialRow: ${isAtInitialRow}, animationsComplete: ${cellClickAnimationsComplete}, temporarilyHidden: ${isButtonTemporarilyHidden})`);
     };
@@ -331,6 +468,36 @@ const createStartButton = (appWidth: number, appHeight: number, minesContainer?:
         console.log('🎬 Cell click animations starting - hiding collect button');
         cellClickAnimationsComplete = false;
         updateButtonVisibility();
+    };
+
+    // Function to restore button states when they become available
+    const restoreButtonStates = () => {
+        console.log('🔄 Restoring button states to normal');
+
+        // Reset operation flags
+        isStartOperationInProgress = false;
+        isCollectOperationInProgress = false;
+
+        // Reset mobile click protection
+        clickCount = 0;
+        if (clickCountResetTimeout) {
+            clearTimeout(clickCountResetTimeout);
+            clickCountResetTimeout = null;
+        }
+
+        // Restore start button state if it exists and is visible
+        if (startButtonSprite && startContainer.visible) {
+            startButtonSprite.alpha = 1.0;
+            startButtonSprite.eventMode = 'static';
+            console.log('✅ Start button state restored');
+        }
+
+        // Restore collect button state if it exists and is visible
+        if (collectButtonSprite && collectContainer.visible) {
+            collectButtonSprite.alpha = 1.0;
+            collectButtonSprite.eventMode = 'static';
+            console.log('✅ Collect button state restored');
+        }
     };
 
     // Function to temporarily hide buttons for 1 second

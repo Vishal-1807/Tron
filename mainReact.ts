@@ -44,7 +44,7 @@ import { initializeActivityManager, pauseActivityTimer, resumeActivityTimer } fr
     video.style.objectFit = 'cover';
 
     const source = document.createElement('source');
-    source.src = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-mineSweeper/assets/minesweeper_splash.mp4';
+    source.src = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/assets/minesweeper_splash.mp4';
     source.type = 'video/mp4';
 
     video.appendChild(source);

@@ -11,7 +11,7 @@ import { initializeActivityManager, pauseActivityTimer, resumeActivityTimer } fr
 import { SoundManager } from './utils/SoundManager';
 
 // 🔧 CONFIGURATION: Change this to switch between modes
-const USE_REACT_MODE = false; // Set to false for local mode
+const USE_REACT_MODE = true; // Set to false for local mode
 
 // Common game initialization logic
 const initializeGame = async (app: Application, container?: HTMLDivElement) => {
@@ -327,7 +327,7 @@ const initReactMode = async (container: HTMLDivElement) => {
   video.style.objectFit = 'cover';
 
   const source = document.createElement('source');
-  source.src = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-mineSweeper/assets/minesweeper_splash.mp4';
+  source.src = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/assets/minesweeper_splash.mp4';
   source.type = 'video/mp4';
 
   video.appendChild(source);

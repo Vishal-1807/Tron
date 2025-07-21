@@ -2,7 +2,7 @@ import { Assets } from 'pixi.js';
 
 export async function loadAssets() {
     // const ASSET_BASE = '';
-    const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-mineSweeper/'
+    const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/'
     
     // Load all assets including the font file
     await Assets.load([
