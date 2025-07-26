@@ -54,6 +54,9 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
     const buttonSize = appHeight * BUTTON_SIZE_RATIO;
     const text = getTextAPI();
 
+    let isStartEventRunning = false;
+    let isCollectEventRunning = false;
+
     mainContainer.zIndex = 100;
     startContainer.zIndex = 101;
     collectContainer.zIndex = 101;
@@ -103,10 +106,12 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
             if (minesContainer?.enableContainer) minesContainer.enableContainer();
             if (minesContainer?.switchCurrentRowToGreen) minesContainer.switchCurrentRowToGreen();
             GlobalState.setGameStarted(true);
+            isStartEventRunning = false;
         } else {
             enableUIComponents();
             if (minesContainer?.enableContainer) minesContainer.enableContainer();
             GlobalState.setGameStarted(false);
+            isStartEventRunning = false;
         }
     };
 
@@ -117,9 +122,12 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
         } else {
             GlobalState.setGameStarted(false);
         }
+        isCollectEventRunning = false;
     };
 
     const handleStartClick = async () => {
+        if (isStartEventRunning) return;
+        isStartEventRunning = true;
         text.showClickGreenCell();
         recordUserActivity(ActivityTypes.GAME_START);
         const now = Date.now();
@@ -131,10 +139,14 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
             SoundManager.playStartClick();
         } catch (e) {
             console.error('Start click failed', e);
+        } finally {
+            isStartEventRunning = false;
         }
     };
 
     const handleCollectClick = async () => {
+        if (isCollectEventRunning) return;
+        isCollectEventRunning = true;
         recordUserActivity(ActivityTypes.COLLECT_CLICK);
         const now = Date.now();
         if (now - lastClickTime < CLICK_DEBOUNCE_MS) return;
@@ -145,6 +157,8 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
             SoundManager.playCollectClick();
         } catch (e) {
             console.error('Collect click failed', e);
+        } finally {
+            isCollectEventRunning = false;
         }
     };
 
