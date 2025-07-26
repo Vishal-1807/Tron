@@ -1,16 +1,25 @@
 import { Howl, Howler } from 'howler';
+import { GlobalState } from '../globals/gameState';
+import { REACT_MODE } from '../reactMode';
 
 let bgVolume = 1;
 let sfxVolume = 1;
 let isMuted = false;
-const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/';
+// const ASSET_BASE = 'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/';
 // const ASSET_BASE = '';
 // Store sound instances
 const sounds: Record<string, Howl> = {};
 
+const getAssetBase = () => {
+  return REACT_MODE ? 
+    `${GlobalState.getS3Url()}tron-minesweeper/` : 
+    'https://s3.eu-west-2.amazonaws.com/static.inferixai.link/pixi-game-assets/tron-minesweeper/';
+}
+
 export const SoundManager = {
 
   load() {
+    const ASSET_BASE = getAssetBase();
     const soundsToLoad = {
       bgMusic: `${ASSET_BASE}sounds/bgLoop.ogg`,
       uiclick: `${ASSET_BASE}sounds/uiclick.ogg`,

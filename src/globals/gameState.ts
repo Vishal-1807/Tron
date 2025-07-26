@@ -31,6 +31,11 @@ const DEFAULT_BALANCE = 1000000;
 const DEFAULT_STAKE = 1.00;
 const DEFAULT_TABLE_ID = "STGMS101";
 
+//urls
+let s3_url = "";
+let api_url = "";
+let websocket_url = "";
+
 const setGameStarted = (started: boolean) => {
     const wasStarted = gameStarted;
     gameStarted = started;
@@ -63,6 +68,30 @@ const setGameStarted = (started: boolean) => {
 
 const getGameStarted = () => {
     return gameStarted;
+}
+
+const getS3Url = () => {
+    return s3_url;
+}
+
+const getApiUrl = () => {
+    return api_url;
+}
+
+const getWebSocketUrl = () => {
+    return websocket_url;
+}
+
+const setS3Url = (url: string) => {
+    s3_url = url;
+}
+
+const setApiUrl = (url: string) => {
+    api_url = url;
+}
+
+const setWebSocketUrl = (url: string) => {
+    websocket_url = url;
 }
 
 const addGameStartedListener = (callback: () => void) => {
@@ -441,6 +470,12 @@ export const GlobalState = {
     total_cols: DEFAULT_COLS,
     current_row: DEFAULT_ROWS - 1, // Start at bottom row
     game_matrix: [] as string[][],
+    getS3Url,
+    getApiUrl,
+    getWebSocketUrl,
+    setS3Url,
+    setApiUrl,
+    setWebSocketUrl,
     
     // Game state
     balance: DEFAULT_BALANCE,

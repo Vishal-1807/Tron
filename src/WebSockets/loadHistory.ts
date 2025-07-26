@@ -1,4 +1,5 @@
 import { GlobalState } from "../globals/gameState";
+import { REACT_MODE } from "../reactMode";
 import { gametoken } from "./token";
 
 let currentHistoryResponse = null;
@@ -8,14 +9,14 @@ let currentHistoryResponse = null;
  */
 export const loadHistoryPage = async (page: number = 1, pageSize: number = 10) => {
   console.log(`📊 Loading history page ${page} with pageSize ${pageSize}`);
-  
+  const url = REACT_MODE ? `${GlobalState.getApiUrl()}/api/get-minesweeper-history` : 'https://backend.inferixai.link/api/get-minesweeper-history';
   try {
-    const response = await fetch('https://backend.inferixai.link/api/get-minesweeper-history', {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // 'authorization': `Bearer ${gametoken}`,
-        'authorization': `Bearer ${GlobalState.getToken()}`
+        'authorization': REACT_MODE ?`Bearer ${GlobalState.getToken()}`: `Bearer ${gametoken}`,
       },
       body: JSON.stringify({
         page: page,
