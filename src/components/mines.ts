@@ -1150,13 +1150,8 @@ export const createMines = (appWidth: number, appHeight: number, rows: number, c
             console.log(`📍 Grid position reset to original starting position for row ${originalStartingRow}`);
         }
 
-        // Set current row to green overlays for new game
-        const currentRow = GlobalState.getCurrentRow();
-        const newGrid = minesGrid as any;
-        if (newGrid && newGrid.setRowGreenOverlay) {
-            newGrid.setRowGreenOverlay(currentRow, true);
-            console.log(`🟢 Current row ${currentRow} set to green overlays for new game`);
-        }
+        // Don't set green overlays here - wait for successful start event
+        // The green overlays will be set by switchCurrentRowToGreen() after successful start
 
         console.log('✅ Fresh start reset completed - grid is clean and ready');
     };
