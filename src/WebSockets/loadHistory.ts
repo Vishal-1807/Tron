@@ -9,7 +9,7 @@ let currentHistoryResponse = null;
  */
 export const loadHistoryPage = async (page: number = 1, pageSize: number = 10) => {
   console.log(`📊 Loading history page ${page} with pageSize ${pageSize}`);
-  const url = REACT_MODE ? `${GlobalState.getApiUrl()}/api/get-minesweeper-history` : 'https://backend.inferixai.link/api/get-minesweeper-history';
+  const url = REACT_MODE ? `${GlobalState.getApiUrl()}/unity/get-minesweeper-history` : 'https://backend.inferixai.link/unity/get-minesweeper-history';
   try {
     const response = await fetch(url, {
       method: 'POST',

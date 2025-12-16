@@ -162,12 +162,13 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
         }
     };
 
-    const createButtonSprites = () => {
+    const createButtonSprites = async (): Promise<void> => {
         const useAnimatedStart = Assets.get('startbuttonSprite') !== undefined;
         const useAnimatedCollect = Assets.get('collectbuttonSprite') !== undefined;
 
+        // Create start button sprite
         if (useAnimatedStart) {
-            createSpriteFromLoadedAssets('startbuttonSprite', {
+            const sprite = await createSpriteFromLoadedAssets('startbuttonSprite', {
                 x: appWidth * BUTTON_X_RATIO,
                 y: appHeight * BUTTON_Y_RATIO,
                 width: buttonSize,
@@ -176,14 +177,14 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
                 loop: true,
                 autoplay: true,
                 anchor: 0.5
-            }).then(sprite => {
-                startButtonSprite = sprite;
-                startButtonSprite.eventMode = 'static';
-                startButtonSprite.cursor = 'pointer';
-                makeSpriteClickOnReleaseOnly(startButtonSprite, handleStartClick);
-                startButtonSprite.zIndex = 100;
-                startContainer.addChild(startButtonSprite);
             });
+            startButtonSprite = sprite;
+            startButtonSprite.eventMode = 'static';
+            startButtonSprite.cursor = 'pointer';
+            makeSpriteClickOnReleaseOnly(startButtonSprite, handleStartClick);
+            startButtonSprite.zIndex = 100;
+            startContainer.addChild(startButtonSprite);
+            console.log('✅ Start button sprite created and added');
         } else {
             startButtonSprite = createButton({
                 texture: Assets.get('startButton'),
@@ -197,10 +198,12 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
             });
             startButtonSprite.zIndex = 100;
             startContainer.addChild(startButtonSprite);
+            console.log('✅ Start button (static) created and added');
         }
 
+        // Create collect button sprite
         if (useAnimatedCollect) {
-            createSpriteFromLoadedAssets('collectbuttonSprite', {
+            const sprite = await createSpriteFromLoadedAssets('collectbuttonSprite', {
                 x: appWidth * BUTTON_X_RATIO,
                 y: appHeight * BUTTON_Y_RATIO,
                 width: buttonSize,
@@ -209,14 +212,14 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
                 loop: true,
                 autoplay: true,
                 anchor: 0.5
-            }).then(sprite => {
-                collectButtonSprite = sprite;
-                collectButtonSprite.eventMode = 'static';
-                collectButtonSprite.cursor = 'pointer';
-                makeSpriteClickOnReleaseOnly(collectButtonSprite, handleCollectClick);
-                collectButtonSprite.zIndex = 100;
-                collectContainer.addChild(collectButtonSprite);
             });
+            collectButtonSprite = sprite;
+            collectButtonSprite.eventMode = 'static';
+            collectButtonSprite.cursor = 'pointer';
+            makeSpriteClickOnReleaseOnly(collectButtonSprite, handleCollectClick);
+            collectButtonSprite.zIndex = 100;
+            collectContainer.addChild(collectButtonSprite);
+            console.log('✅ Collect button sprite created and added');
         } else {
             collectButtonSprite = createButton({
                 texture: Assets.get('collectButton'),
@@ -230,9 +233,8 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
             });
             collectButtonSprite.zIndex = 100;
             collectContainer.addChild(collectButtonSprite);
+            console.log('✅ Collect button (static) created and added');
         }
-
-        return true;
     };
 
     const updateButtonVisibility = () => {
@@ -249,10 +251,19 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
     let isButtonTemporarilyHidden = false;
     let buttonHideTimeout = null;
 
-    const initializeButton = async () => {
-        if (areButtonsInitialized) return;
-        createButtonSprites();
+    const initializeButton = async (): Promise<void> => {
+        if (areButtonsInitialized) {
+            console.log('⚠️ Button already initialized, skipping');
+            return;
+        }
 
+        console.log('🎮 Initializing start button...');
+
+        // Wait for all button sprites to be created
+        await createButtonSprites();
+        console.log('✅ Button sprites creation complete');
+
+        // Set up event listeners
         GlobalState.addGameStartedListener(() => {
             cellClickAnimationsComplete = false;
             updateButtonVisibility();
@@ -266,10 +277,19 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
         GlobalState.addCurrentRowChangeListener(() => updateButtonVisibility());
 
         areButtonsInitialized = true;
+        console.log('✅ Start button initialization complete');
     };
 
     const buttonAPI = {
         initialize: initializeButton,
+        waitForInitialization: async (): Promise<void> => {
+            if (areButtonsInitialized) {
+                console.log('✅ Button already initialized');
+                return;
+            }
+            console.log('⏳ Waiting for button initialization...');
+            await initializeButton();
+        },
         updateVisibility: updateButtonVisibility,
         getContainer: () => mainContainer,
         isInitialized: () => areButtonsInitialized,
@@ -318,7 +338,7 @@ const createStartButton = (appWidth, appHeight, minesContainer) => {
     };
 
     Object.assign(mainContainer, buttonAPI);
-    setTimeout(() => initializeButton(), 100);
+    // Note: Initialization is now called explicitly from main.ts via waitForInitialization()
     return mainContainer;
 };
 
